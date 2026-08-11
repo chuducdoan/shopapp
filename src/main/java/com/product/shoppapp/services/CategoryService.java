@@ -36,7 +36,8 @@ public class CategoryService implements ICategoryService {
     public Category updateCategory(Long categoryId, CategoryDTO categoryDTO) {
         Category existingCategory = getCategoryById(categoryId);
         existingCategory.setName(categoryDTO.getName());
-        return categoryRepository.save(existingCategory);
+        categoryRepository.save(existingCategory);
+        return existingCategory;
     }
 
     @Override

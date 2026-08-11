@@ -3,6 +3,7 @@ package com.product.shoppapp.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -11,6 +12,7 @@ import java.util.Date;
 @Data
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Order {
@@ -18,7 +20,7 @@ public class Order {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "full_name", length = 100)
+    @Column(name = "fullname", length = 100)
     private String fullName;
 
     @Column(name = "email", length = 100)
@@ -30,7 +32,7 @@ public class Order {
     private String note;
 
     @Column(name = "order_date")
-    private LocalDateTime orderDate;
+    private Date orderDate;
 
     private String status;
 
@@ -44,7 +46,7 @@ public class Order {
     private String shippingAddress;
 
     @Column(name = "shipping_date")
-    private Date shippingDate;
+    private LocalDate shippingDate;
 
     @Column(name = "tracking_method")
     private String trackingMethod;
@@ -52,7 +54,6 @@ public class Order {
     @Column(name = "payment_method")
     private String paymentMethod;
 
-    @Column(name = "active")
     private Boolean active;
 
     @ManyToOne

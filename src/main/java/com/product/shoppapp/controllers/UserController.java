@@ -2,7 +2,9 @@ package com.product.shoppapp.controllers;
 
 import com.product.shoppapp.dtos.UserDTO;
 import com.product.shoppapp.dtos.UserLoginDTO;
+import com.product.shoppapp.services.UserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -15,7 +17,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("${api.prefix}/users")
+@RequiredArgsConstructor
 public class UserController {
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
@@ -27,7 +31,9 @@ public class UserController {
            if (!userDTO.getPassword().equals(userDTO.getRetypePassword())) {
                return ResponseEntity.badRequest().body("Passwords do not match");
            }
-           return ResponseEntity.ok("Create user " + userDTO);
+           userService.createUser(userDTO);
+           return ResponseEntity.ok("Register user successfully"
+           );
        } catch (Exception e) {
            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
        }

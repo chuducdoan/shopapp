@@ -1,6 +1,7 @@
 package com.product.shoppapp.controllers;
 
 import com.product.shoppapp.dtos.CategoryDTO;
+import com.product.shoppapp.models.Category;
 import com.product.shoppapp.services.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,30 +26,34 @@ public class CategoryController {
             List<String> errorMessages = bindingResult.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
             return ResponseEntity.badRequest().body(errorMessages);
         }
-        categoryService.createCategory(categoryDTO);
-        return ResponseEntity.ok("Create category " + categoryDTO);
+        Category category = categoryService.createCategory(categoryDTO);
+        return ResponseEntity.ok(category);
     }
 
     @GetMapping("")
-    public ResponseEntity<String> getAllCategories() {
-        categoryService.getAllCategories();
-        return ResponseEntity.ok("All categories");
+    public ResponseEntity<List<Category>> getAllCategories() {
+        List<Category> categories = categoryService.getAllCategories();
+        return ResponseEntity.ok(categories);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<String> getCategoriesById(@PathVariable("id") String id) {
-        categoryService.getCategoryById(Long.parseLong(id));
-        return ResponseEntity.ok("All categories");
+    public ResponseEntity<Category> getCategoriesById(@PathVariable("id") String id) {
+        Category category = categoryService.getCategoryById(Long.parseLong(id));
+        return ResponseEntity.ok(category);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCategory(@PathVariable("id") String id, @RequestBody CategoryDTO categoryDTO) {
-        categoryService.updateCategory(Long.parseLong(id), categoryDTO);
-        return ResponseEntity.ok("update category with id: " + id);
+    public ResponseEntity<String> updateCategory(
+            @PathVariable("id") String id,
+            @Valid @RequestBody CategoryDTO categoryDTO
+    ) {
+        Category category = categoryService.updateCategory(Long.parseLong(id), categoryDTO);
+        return ResponseEntity.ok("Update category successfully");
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable("id") String id) {
-        return ResponseEntity.ok("delete category with id: " + id);
+        categoryService.deleteCategory(Long.parseLong(id));
+        return ResponseEntity.ok("delete category with id: " + id + " successfully");
     }
 }
