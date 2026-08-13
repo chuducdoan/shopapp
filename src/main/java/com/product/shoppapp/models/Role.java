@@ -19,4 +19,7 @@ public class Role {
 
     @Column(name = "role_name", nullable = false, length = 200)
     private String roleName;
+
+    public static final String USER = "USER";
+    public static final String ADMIN = "ADMIN";
 }

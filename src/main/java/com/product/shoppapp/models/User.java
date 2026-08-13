@@ -43,7 +43,7 @@ public class User extends BaseEntity implements UserDetails {
     private Date dateOfBirth;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
 
@@ -57,7 +57,7 @@ public class User extends BaseEntity implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
-        authorityList.add(new SimpleGrantedAuthority(("ROLE_"+ getRole().getRoleName())));
+        authorityList.add(new SimpleGrantedAuthority(("ROLE_"+ getRole().getRoleName().toUpperCase())));
         return authorityList;
     }
 

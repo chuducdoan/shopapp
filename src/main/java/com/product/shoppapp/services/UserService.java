@@ -1,5 +1,6 @@
 package com.product.shoppapp.services;
 
+import com.product.shoppapp.components.JwtTokenUtil;
 import com.product.shoppapp.dtos.UserDTO;
 import com.product.shoppapp.exceptions.DataNotFoundException;
 import com.product.shoppapp.models.Role;
@@ -8,6 +9,9 @@ import com.product.shoppapp.repositories.RoleRepository;
 import com.product.shoppapp.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PermissionDeniedDataAccessException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,15 +23,21 @@ public class UserService implements IUserService{
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final JwtTokenUtil jwtTokenUtil;
+    private final AuthenticationManager authenticationManager;
 
 
     @Override
-    public User createUser(UserDTO userDTO) throws DataNotFoundException {
+    public User createUser(UserDTO userDTO) throws Exception {
         String phoneNumber = userDTO.getPhoneNumber();
         // kiểm tra tồn tại sđt
-        boolean isExist = userRepository.existsByPhoneNumber(phoneNumber);
-        if (isExist) {
+        if (userRepository.existsByPhoneNumber(phoneNumber)) {
             throw new DataIntegrityViolationException("Phone number already exists");
+        }
+        Role role = roleRepository.findById(userDTO.getRoleId())
+                .orElseThrow(() -> new DataNotFoundException("Role not found"));
+        if (role.getRoleName().toUpperCase().equals(Role.ADMIN)) {
+            throw new Exception("You cannot register an admin account");
         }
         // convert userDTO to user
         User newUser = User.builder()
@@ -39,8 +49,7 @@ public class UserService implements IUserService{
                 .facebookAccountId(userDTO.getFacebookAccountId())
                 .googleAccountId(userDTO.getGoogleAccountId())
                 .build();
-        Role role = roleRepository.findById(userDTO.getRoleId())
-                .orElseThrow(() -> new DataNotFoundException("Role not found"));
+
         newUser.setRole(role);
         if (userDTO.getFacebookAccountId() == 0 && userDTO.getGoogleAccountId() == 0) {
             String password = userDTO.getPassword();
@@ -57,7 +66,16 @@ public class UserService implements IUserService{
         if (existingUser.isEmpty()) {
             throw new DataNotFoundException("Invalid phone number / password");
         }
-
-        return "Login successful";
+        User user = existingUser.get();
+        // check password
+        if (user.getFacebookAccountId() == 0 && user.getGoogleAccountId() == 0) {
+            if(!passwordEncoder.matches(password, user.getPassword())) {
+                throw new DataNotFoundException("wrong phone number or password");
+            }
+        }
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(phoneNumber, password, user.getAuthorities());
+        // authentication with Java Sprong security
+        authenticationManager.authenticate(authenticationToken);
+        return jwtTokenUtil.generateToken(user);
     }
 }

@@ -22,7 +22,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO userDTO, BindingResult result)  {
        try {
            if (result.hasErrors()) {
                List<String> errorMessages = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
@@ -32,17 +32,17 @@ public class UserController {
                return ResponseEntity.badRequest().body("Passwords do not match");
            }
            userService.createUser(userDTO);
-           return ResponseEntity.ok("Register user successfully"
-           );
+           return ResponseEntity.ok("Register user successfully");
        } catch (Exception e) {
            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
        }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> createUser(@Valid @RequestBody UserLoginDTO userDTO) {
+    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userDTO) {
         try {
-            return ResponseEntity.ok("Create user " + userDTO);
+            String token = userService.login(userDTO.getPhoneNumber(), userDTO.getPassword());
+            return ResponseEntity.ok(token);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
