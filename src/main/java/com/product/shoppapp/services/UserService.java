@@ -1,6 +1,6 @@
 package com.product.shoppapp.services;
 
-import com.product.shoppapp.components.JwtTokenUtil;
+import com.product.shoppapp.components.JwtTokenUtils;
 import com.product.shoppapp.dtos.UserDTO;
 import com.product.shoppapp.exceptions.DataNotFoundException;
 import com.product.shoppapp.models.Role;
@@ -9,7 +9,6 @@ import com.product.shoppapp.repositories.RoleRepository;
 import com.product.shoppapp.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +22,7 @@ public class UserService implements IUserService{
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final JwtTokenUtil jwtTokenUtil;
+    private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationManager authenticationManager;
 
 
@@ -76,6 +75,6 @@ public class UserService implements IUserService{
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(phoneNumber, password, user.getAuthorities());
         // authentication with Java Sprong security
         authenticationManager.authenticate(authenticationToken);
-        return jwtTokenUtil.generateToken(user);
+        return jwtTokenUtils.generateToken(user);
     }
 }
