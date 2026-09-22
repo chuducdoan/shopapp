@@ -5,6 +5,7 @@ import com.product.shoppapp.dtos.UserLoginDTO;
 import com.product.shoppapp.models.User;
 import com.product.shoppapp.responses.LoginResponse;
 import com.product.shoppapp.responses.RegisterResponse;
+import com.product.shoppapp.responses.UserResponse;
 import com.product.shoppapp.services.UserService;
 import com.product.shoppapp.components.LocalizationUtils;
 import com.product.shoppapp.utils.MessageKeys;
@@ -13,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -70,6 +68,17 @@ public class UserController {
             return ResponseEntity.badRequest().body(LoginResponse.builder()
                     .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_FAILED, e.getMessage()))
                     .build());
+        }
+    }
+
+    @GetMapping("/details")
+    public ResponseEntity<?> getUserDetails(@RequestHeader("Authorization") String token) {
+        try {
+            String extractedToken = token.substring(7);
+            User user = userService.getUserDetailsFromToken(extractedToken);
+            return ResponseEntity.ok(UserResponse.fromUser(user));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 }

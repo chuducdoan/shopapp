@@ -44,6 +44,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 return;
             }
             final String token = authHeader.substring(7);
+            if (token.isEmpty()) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                return;
+            }
             final String phoneNumber = jwtTokenUtils.extractPhoneNumber(token);
             if (phoneNumber != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 User userDetails = (User) userDetailsService.loadUserByUsername(phoneNumber);
@@ -56,16 +60,20 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
+            System.err.println("Error in JwtTokenFilter: " + e.getMessage());
+            e.printStackTrace();
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
         }
     }
 
     private boolean isBypassToken(@NonNull HttpServletRequest request) {
         final List<Pair<String, String>> bypassTokens = Arrays.asList(
+                Pair.of(String.format("%s/roles", prefix), "GET"),
                 Pair.of(String.format("%s/products", prefix), "GET"),
                 Pair.of(String.format("%s/categories", prefix), "GET"),
                 Pair.of(String.format("%s/users/register", prefix), "POST"),
-                Pair.of(String.format("%s/users/login", prefix), "POST")
+                Pair.of(String.format("%s/users/login", prefix), "POST"),
+                Pair.of(String.format("%s/orders", prefix), "GET")
         );
         for (Pair<String, String> bypassToken : bypassTokens) {
             if (request.getServletPath().contains(bypassToken.getLeft()) && request.getMethod().equals(bypassToken.getRight())) {

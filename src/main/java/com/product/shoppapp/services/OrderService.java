@@ -1,18 +1,21 @@
 package com.product.shoppapp.services;
 
+import com.product.shoppapp.dtos.CartItemDTO;
 import com.product.shoppapp.dtos.OrderDTO;
 import com.product.shoppapp.exceptions.DataNotFoundException;
-import com.product.shoppapp.models.Order;
-import com.product.shoppapp.models.OrderStatus;
-import com.product.shoppapp.models.User;
+import com.product.shoppapp.models.*;
+import com.product.shoppapp.repositories.OrderDetailRepository;
 import com.product.shoppapp.repositories.OrderRepository;
+import com.product.shoppapp.repositories.ProductRepository;
 import com.product.shoppapp.repositories.UserRepository;
 import com.product.shoppapp.responses.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -23,8 +26,11 @@ public class OrderService implements IOrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private  final ModelMapper modelMapper;
+    private final ProductRepository productRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @Override
+    @Transactional
     public OrderResponse createOrder(OrderDTO orderDTO) throws Exception {
         User existingUser = userRepository.findById(orderDTO.getUserId())
                 .orElseThrow(() -> new DataNotFoundException("Cannot find user with id =: " + orderDTO.getUserId()));
@@ -42,8 +48,25 @@ public class OrderService implements IOrderService {
        }
        order.setActive(true);
        order.setShippingDate(shippingDate);
+       order.setTotalMoney(orderDTO.getTotalMoney());
        orderRepository.save(order);
-       return modelMapper.map(order, OrderResponse.class);
+
+       // Tạo danh sách các đối tượng OrderDetail từ cartItems
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        for (CartItemDTO cartItemDTO : orderDTO.getCartItems()) {
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrder(order);
+            Long productId = cartItemDTO.getProductId();
+            Long quantity = cartItemDTO.getQuantity();
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new DataNotFoundException("Cannot found product with id =: " + productId));
+            orderDetail.setProduct(product);
+            orderDetail.setNumberOfProducts(quantity);
+            orderDetail.setPrice(product.getPrice());
+            orderDetails.add(orderDetail);
+        }
+        orderDetailRepository.saveAll(orderDetails);
+       return OrderResponse.fromOrder(order);
     }
 
     @Override

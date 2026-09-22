@@ -1,5 +1,6 @@
 package com.product.shoppapp.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public class Role {
     private Long id;
 
     @Column(name = "role_name", nullable = false, length = 200)
+    @JsonProperty("role_name")
     private String roleName;
 
     public static final String USER = "USER";

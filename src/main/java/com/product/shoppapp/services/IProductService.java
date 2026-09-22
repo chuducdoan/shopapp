@@ -13,7 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import java.util.List;
 
 public interface IProductService {
-    Page<ProductResponse> getAllProducts(PageRequest pageRequest);
+    Page<ProductResponse> getAllProducts(String keyword, Long categoryId, PageRequest pageRequest);
 
     Product getProductById(Long id) throws Exception;
 
@@ -26,4 +26,6 @@ public interface IProductService {
     boolean existsByName(String name);
 
     ProductImage createProductImage(Long productId, ProductImageDTO productImageDTO) throws Exception;
+
+    List<Product> findProductsByIds(List<Long> productIds);
 }

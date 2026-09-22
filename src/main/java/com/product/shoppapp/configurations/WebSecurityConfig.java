@@ -38,18 +38,22 @@ public class WebSecurityConfig {
                         String.format("%s/users/register", prefix),
                         String.format("%s/users/login", prefix))
                 .permitAll()
-                .requestMatchers(HttpMethod.GET, String.format("%s/categories**", prefix)).hasAnyRole(Role.ADMIN, Role.USER)
+
+                .requestMatchers(HttpMethod.GET, String.format("%s/roles**", prefix)).permitAll()
+
+                .requestMatchers(HttpMethod.GET, String.format("%s/categories**", prefix)).permitAll()
                 .requestMatchers(HttpMethod.POST, String.format("%s/categories/**", prefix)).hasAnyRole(Role.ADMIN)
                 .requestMatchers(HttpMethod.PUT, String.format("%s/categories/**", prefix)).hasAnyRole(Role.ADMIN)
                 .requestMatchers(HttpMethod.DELETE, String.format("%s/categories/**", prefix)).hasAnyRole(Role.ADMIN)
 
-                .requestMatchers(HttpMethod.GET, String.format("%s/products**", prefix)).hasAnyRole(Role.ADMIN, Role.USER)
+                .requestMatchers(HttpMethod.GET, String.format("%s/products**", prefix), String.format("%s/products/**", prefix)).permitAll()
                 .requestMatchers(HttpMethod.POST, String.format("%s/products/**", prefix)).hasAnyRole(Role.ADMIN)
                 .requestMatchers(HttpMethod.PUT, String.format("%s/products/**", prefix)).hasAnyRole(Role.ADMIN)
                 .requestMatchers(HttpMethod.DELETE, String.format("%s/products/**", prefix)).hasAnyRole(Role.ADMIN)
+                .requestMatchers(HttpMethod.GET, String.format("%s/products/images/**", prefix)).permitAll()
 
                 .requestMatchers(HttpMethod.POST, String.format("%s/orders/**", prefix)).hasAnyRole(Role.ADMIN, Role.USER)
-                .requestMatchers(HttpMethod.GET, String.format("%s/orders/**", prefix)).hasAnyRole(Role.ADMIN, Role.USER)
+                .requestMatchers(HttpMethod.GET, String.format("%s/orders/**", prefix)).permitAll()
                 .requestMatchers(HttpMethod.PUT, String.format("%s/orders/**", prefix)).hasRole(Role.ADMIN)
                 .requestMatchers(HttpMethod.DELETE, String.format("%s/orders/**", prefix)).hasRole(Role.ADMIN)
 

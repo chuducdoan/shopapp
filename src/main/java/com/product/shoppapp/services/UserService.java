@@ -25,7 +25,6 @@ public class UserService implements IUserService{
     private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationManager authenticationManager;
 
-
     @Override
     public User createUser(UserDTO userDTO) throws Exception {
         String phoneNumber = userDTO.getPhoneNumber();
@@ -72,9 +71,28 @@ public class UserService implements IUserService{
                 throw new DataNotFoundException("wrong phone number or password");
             }
         }
+
+        if (!user.isActive()) {
+            throw new Exception("User is not active");
+        }
+
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(phoneNumber, password, user.getAuthorities());
         // authentication with Java Sprong security
         authenticationManager.authenticate(authenticationToken);
         return jwtTokenUtils.generateToken(user);
+    }
+
+    @Override
+    public User getUserDetailsFromToken(String token) throws Exception {
+        if(jwtTokenUtils.isTokenExpired(token)) {
+            throw new Exception("Token is expired");
+        }
+        String phoneNumber = jwtTokenUtils.extractPhoneNumber(token);
+        Optional<User> user = userRepository.findByPhoneNumber(phoneNumber);
+        if(user.isPresent()) {
+            return user.get();
+        } else {
+            throw new Exception("User not found");
+        }
     }
 }
